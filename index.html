@@ -76,11 +76,9 @@
       </button>
 
       <!-- Read Aloud Button with Tooltip -->
-      <button class="px-4 py-2 text-lg relative group" onclick="readAloud()">
-        🔊
-        <span class="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs px-2 py-1 rounded">
-          Read Aloud
-        </span>
+      <button id="readAloudBtn" class="px-6 py-2 text-lg relative group" onclick="toggleReadAloud()" title="Read Aloud">
+        <!-- Icon will be updated dynamically -->
+        <span id="readAloudIcon">🔊</span>
       </button>
 
       <!-- Language Selection Dropdown -->
@@ -118,14 +116,33 @@
         <div class="book-page p-4 border-b ">
           <h1 class="text-2xl font-bold">Page 1</h1>
           <img src="LUT_University_Logo.png">
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+          <p>
+            Outside the funeral home, I heard a boy say that she had fallen off the back of her boyfriend’s motorcycle. Broken her neck.She never knew what hit her, he said. I was 13. The dead girl had been a junior in high school.
+          </p>
+          <p>
+            The line to see her snaked around the building. Boys with long hair, wearing ties they’d borrowed from their fathers,
+            and girls with thick blue eyeshadow smoked cigarettes in the parking lot.
+            Someone passed a bottle of Jack. There were no adults there, just very old kids.
+          </p>
+          <p>
+            She almost looked like she was sleeping, except that she was too still.
+            There was a puffiness to her face that didn’t seem quite right.
+            They had dressed her for the prom; the crinoline sleeves of her gown like poofs of pink cotton candy. Some kids prayed, but I couldn’t.
+            I just stared at the roses in her corsage.
+          </p>
         </div>
         <div class="book-page p-4 border-b ">
           <h1 class="text-2xl font-bold">Page 2</h1>
           <img src="library-logo.png">
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+          <h3 class="wp-block-heading">Magic Show</h3>
+          <p>“Come on! It’s starting!” Greg, my neighbor, hollered from the sidewalk.&nbsp;</p>
+          <p>“What’s starting?” I said. Behind him, groups of kids hurried down the street.&nbsp;&nbsp;</p>
+          <p>We’d moved to the neighborhood just weeks before. I was shy; a bookworm, waiting for school to start. Greg was the only kid I’d met.</p>
+          <p>“The magic show!” said Greg, exasperated. “At Mr. Hale’s house!”</p>
+          <p>At the end of the Hales’ dirt driveway, rows of kids were seated on the grass.</p>
+          <p>White-haired and very thin, Mr. Hale wore a black top-hat and tails. In his hand he gripped a wand, producing doves from an urn. He asked for a volunteer to be sawed in half. I raised my hand. No one breathed.</p>
+          <p>“Just relax,” Mr. Hale whispered. “There’s nothing to it.” I got into the box and held my breath.</p>
+          <p>A collective gasp went up. And when I emerged in one piece, I was a star.</p>
         </div>
         <div class="book-page p-4 border-b ">
           <h1 class="text-2xl font-bold">Page 3</h1>
@@ -302,22 +319,63 @@
       document.body.classList.toggle("dark");
     }
 
-    // function readAloud() {
-    //   const text = document.getElementById("book-container").innerText;
-    //   const speech = new SpeechSynthesisUtterance(text);
-    //   speech.lang = document.getElementById("languageSelect").value; // Read in selected language
-    //   window.speechSynthesis.speak(speech);
-    // }
+    function readAloud() {
+      const text = document.getElementById("book-container").innerText;
+      const speech = new SpeechSynthesisUtterance(text);
+      speech.lang = document.getElementById("languageSelect").value; // Read in selected language
+      window.speechSynthesis.speak(speech);
+    }
+
+    let isReading = false;
+    let utterance = null;
+
+    function toggleReadAloud() {
+      const btn = document.getElementById("readAloudBtn");
+      const icon = document.getElementById("readAloudIcon");
+      const text = document.getElementById("book-container").innerText;
+
+      // If speech is paused, resume it
+      if (speechSynthesis.paused) {
+        debugger
+        speechSynthesis.resume();
+        icon.textContent = '⏸️'; // Pause icon
+        isReading = true;
+        return;
+      }
+
+      // If already speaking, pause it
+      if (speechSynthesis.speaking) {
+        debugger
+        speechSynthesis.pause();
+        icon.textContent = '▶️'; // Play icon
+        isReading = false;
+        return;
+      }
+
+      // If not speaking, start reading
+      if (!isReading) {
+        debugger
+        utterance = new SpeechSynthesisUtterance(text);
+        utterance.onend = () => {
+          icon.textContent = '🔊'; // Back to initial state
+          isReading = false;
+        };
+        speechSynthesis.speak(utterance);
+        icon.textContent = '⏸️'; // Show pause when playing
+        isReading = true;
+      }
+    }
 
 
-    document.addEventListener("DOMContentLoaded", function () {
-      fetch("chatbot.html")
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById("chatbot-container").innerHTML = data;
-        })
-        .catch(error => console.error("Error loading chatbot:", error));
-    });
+
+    // document.addEventListener("DOMContentLoaded", function () {
+    //   fetch("chatbot.html")
+    //     .then(response => response.text())
+    //     .then(data => {
+    //         document.getElementById("chatbot-container").innerHTML = data;
+    //     })
+    //     .catch(error => console.error("Error loading chatbot:", error));
+    // });
   </script>
 </body>
 </html>
