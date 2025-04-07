@@ -319,63 +319,51 @@
       document.body.classList.toggle("dark");
     }
 
-    function readAloud() {
-      const text = document.getElementById("book-container").innerText;
-      const speech = new SpeechSynthesisUtterance(text);
-      speech.lang = document.getElementById("languageSelect").value; // Read in selected language
-      window.speechSynthesis.speak(speech);
-    }
-
-    let isReading = false;
     let utterance = null;
+    let isReading = false;
+    let isPaused = false;
 
     function toggleReadAloud() {
-      const btn = document.getElementById("readAloudBtn");
-      const icon = document.getElementById("readAloudIcon");
       const text = document.getElementById("book-container").innerText;
+      const lang = document.getElementById("languageSelect").value;
+      const icon = document.getElementById("readAloudIcon");
 
-      // If speech is paused, resume it
-      if (speechSynthesis.paused) {
-        debugger
+      // If paused, resume
+      if (isPaused && speechSynthesis.paused) {
         speechSynthesis.resume();
-        icon.textContent = '⏸️'; // Pause icon
-        isReading = true;
+        isPaused = false;
+        icon.textContent = "⏸️"; // Pause icon
         return;
       }
 
-      // If already speaking, pause it
-      if (speechSynthesis.speaking) {
-        debugger
+      // If speaking, pause
+      if (isReading && speechSynthesis.speaking) {
         speechSynthesis.pause();
-        icon.textContent = '▶️'; // Play icon
-        isReading = false;
+        isPaused = true;
+        icon.textContent = "▶️"; // Play icon
         return;
       }
 
-      // If not speaking, start reading
-      if (!isReading) {
-        debugger
+      // If not already speaking, start a new utterance
+      if (!isReading || !utterance) {
+        // Cancel any existing speech
+        speechSynthesis.cancel();
+
         utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
+
         utterance.onend = () => {
-          icon.textContent = '🔊'; // Back to initial state
           isReading = false;
+          isPaused = false;
+          icon.textContent = "🔊"; // Reset to speaker icon when done
         };
+
         speechSynthesis.speak(utterance);
-        icon.textContent = '⏸️'; // Show pause when playing
         isReading = true;
+        isPaused = false;
+        icon.textContent = "⏸️"; // Pause icon
       }
     }
-
-
-
-    // document.addEventListener("DOMContentLoaded", function () {
-    //   fetch("chatbot.html")
-    //     .then(response => response.text())
-    //     .then(data => {
-    //         document.getElementById("chatbot-container").innerHTML = data;
-    //     })
-    //     .catch(error => console.error("Error loading chatbot:", error));
-    // });
   </script>
 </body>
 </html>
